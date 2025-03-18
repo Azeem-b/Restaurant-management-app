@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Bookit - Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&amp;family=Poppins:wght@400;500;600;700&amp;display=swap">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&amp;display=swap" rel="stylesheet">
+    <script src="/js/login.js"></script>
+  </head>
+  <body>
+    <!-- Header-->
+    <header class="header"><a class="logo" href="/"><img src="/images/logo.png" alt="Bookit Logo"><span class="logo-text">Bookit</span></a>
+      <nav class="nav-menu"><a href="/">Home</a><a href="/reservation">Reservation</a><a href="/about">About</a><a href="/view">View</a></nav>
+      <div class="utilities"><a href="#"><img class="utility-icon" src="/images/search-analytics.png" alt="Search"></a><a href="#"><img class="utility-icon" src="/images/shopping-bag.png" alt="Shopping Cart"></a><a href="/login"><img class="utility-icon" src="/images/user.png" alt="User Account"></a></div>
+    </header>
+    <!-- Login Form Section-->
+    <div class="login-container">
+      <div class="login-box">
+        <button class="close-btn" onclick="window.location.href='/'">×</button>
+        <h2>Login</h2>
+        <form class="login-form" action="/login" method="POST">
+          <div class="form-group">
+            <div class="input-with-icon">
+              <input id="email" type="email" name="email" required placeholder="Email"><img class="input-icon" src="/images/email.png" alt="Email">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="input-with-icon">
+              <input id="password" type="password" name="password" required placeholder="Password"><img class="input-icon" src="/images/padlock.png" alt="Password">
+            </div>
+          </div><a class="forgot-password" id="showForgotPassword" href="#">Forgot Password?</a>
+          <button class="login-btn" type="submit">Login</button>
+        </form>
+        <div class="register-link"><span>Don't have an account? </span><a id="showRegister" href="#">Register</a></div>
+      </div>
+    </div>
+    <!-- Registration Form Section-->
+    <div class="register-container hidden">
+      <div class="register-box">
+        <button class="close-btn-register" onclick="window.location.href='/'">×</button>
+        <h2>Register</h2>
+        <form class="register-form" action="/register" method="POST">
+          <div class="form-group">
+            <div class="input-with-icon">
+              <input id="registerName" type="text" name="name" required placeholder="Full Name"><img class="input-icon" src="/images/user.png" alt="Name">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="input-with-icon">
+              <input id="registerEmail" type="email" name="email" required placeholder="Email"><img class="input-icon" src="/images/email.png" alt="Email">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="input-with-icon">
+              <input id="registerPassword" type="password" name="password" required placeholder="Password"><img class="input-icon" src="/images/padlock.png" alt="Password">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="input-with-icon">
+              <input id="confirmPassword" type="password" name="confirmPassword" required placeholder="Confirm Password"><img class="input-icon" src="/images/padlock.png" alt="Confirm Password">
+            </div>
+          </div>
+          <button class="register-btn" type="submit">Register</button>
+        </form>
+        <div class="login-link"><span>Already have an account?</span><a id="loginLink" href="#">Login</a></div>
+      </div>
+    </div>
+    <!-- Forgot Password Form Section-->
+    <div class="forgot-password-container hidden">
+      <div class="forgot-password-box">
+        <button class="close-btn-forgot" onclick="window.location.href='/'">×</button>
+        <h2>Reset Password</h2>
+        <form class="forgot-password-form" action="/forgot-password" method="POST">
+          <div class="form-group">
+            <div class="input-with-icon">
+              <input id="forgotEmail" type="email" name="email" required placeholder="Enter your email"><img class="input-icon" src="/images/email.png" alt="Email">
+            </div>
+          </div>
+          <button class="reset-btn" type="submit">Reset Password</button>
+        </form>
+        <div class="login-link"><span>Remember your password?</span><a id="backToLogin" href="#">Login</a></div>
+      </div>
+    </div>
+    <!-- Popup Message-->
+    <div class="popup-overlay" id="resetPopup">
+      <div class="popup-box">
+        <div class="popup-content"><img class="popup-icon" src="/images/email.png" alt="Email Sent">
+          <h3>Check Your Email</h3>
+          <p>We've sent a password reset link to your email address.</p>
+          <button class="popup-btn" id="closePopup">OK</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
