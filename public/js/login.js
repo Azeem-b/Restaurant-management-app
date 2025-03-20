@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const showForgotPassword = document.getElementById('showForgotPassword');
     const backToLogin = document.getElementById('backToLogin');
     const forgotPasswordForm = document.querySelector('.forgot-password-form');
+    const loginForm = document.querySelector('.login-form');
+    const registerForm = document.querySelector('.register-form');
     const popup = document.getElementById('resetPopup');
     const closePopup = document.getElementById('closePopup');
 
@@ -48,6 +50,86 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Handle login form submission
+    if (loginForm) {
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Show success message
+                    showMessage('Login successful! Redirecting...', 'success');
+                    // Redirect to home page after a short delay
+                    setTimeout(() => {
+                        window.location.href = '/home';
+                    }, 1500);
+                } else {
+                    // Show error message
+                    showMessage(data.message || 'Login failed', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('An error occurred during login', 'error');
+            }
+        });
+    }
+
+    // Handle registration form submission
+    if (registerForm) {
+        registerForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Show success message
+                    showMessage('Registration successful! Please login.', 'success');
+                    // Show login form after a short delay
+                    setTimeout(() => {
+                        document.querySelector('.register-container').classList.add('hidden');
+                        document.querySelector('.login-container').classList.remove('hidden');
+                    }, 1500);
+                } else {
+                    // Show error message
+                    showMessage(data.message || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('An error occurred during registration', 'error');
+            }
+        });
+    }
+
     // Handle forgot password form submission
     if (forgotPasswordForm) {
         forgotPasswordForm.addEventListener('submit', function(e) {
@@ -75,5 +157,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 popup.classList.remove('show');
             }
         });
+    }
+
+    // Function to show messages
+    function showMessage(message, type) {
+        // Create message element
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}`;
+        messageDiv.textContent = message;
+
+        // Add message to the page
+        document.body.appendChild(messageDiv);
+
+        // Remove message after 3 seconds
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 3000);
     }
 });
