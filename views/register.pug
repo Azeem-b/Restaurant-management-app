@@ -1,0 +1,55 @@
+extends layout
+
+block content
+  .container.mt-5
+    h2 Register
+    
+    if error
+      .alert.alert-danger(role="alert")= error
+    
+    form(action="/register", method="POST", id="registerForm")
+      .mb-3
+        label.form-label(for="name") Full Name
+        input.form-control(
+          type="text",
+          id="name",
+          name="name",
+          required,
+          value=formData ? formData.name : ''
+        )
+      
+      .mb-3
+        label.form-label(for="email") Email
+        input.form-control(
+          type="email",
+          id="email",
+          name="email",
+          required,
+          value=formData ? formData.email : ''
+        )
+      
+      .mb-3
+        label.form-label(for="password") Password
+        input.form-control(
+          type="password",
+          id="password",
+          name="password",
+          required,
+          minlength="8"
+        )
+      
+      button.btn.btn-primary(type="submit") Register
+    
+    p.mt-3 Already have an account? 
+      a(href="/login") Login
+
+  script.
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      const password = document.getElementById('password').value;
+      if (password.length < 8) {
+        e.preventDefault();
+        alert('Password must be at least 8 characters');
+        return false;
+      }
+      return true;
+    });

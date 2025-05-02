@@ -1,0 +1,30 @@
+extends layout
+
+block content
+  .container.mt-5
+    h1.text-center.mb-5 Our Menu
+    p.text-center.mb-5.text-muted Experience a fusion of global flavors with our special Indian selections
+    
+    each category in menu.categories
+      .menu-category.mb-5
+        h2.mb-4.border-bottom.pb-2= category.name
+        .row
+          each item in category.items
+            .col-md-6.mb-4
+              .card.h-100
+                .card-body
+                  h5.card-title= item.name
+                  p.card-text.text-muted= item.desc
+                  p.card-text
+                    strong $#{item.price.toFixed(2)}
+                if category.name === 'Desserts'
+                  .card-footer.bg-warning.bg-opacity-10
+                    small.text-muted Try our signature Indian sweets!
+    
+    .text-center.mt-4
+      p.special-note.mb-4 
+        strong Spice Level: 
+        | Ask your server to adjust the spice level to your preference
+      a.btn.btn-primary(href="/") Return Home
+      br
+      small.text-muted.mt-2 All dishes can be made vegetarian upon request
