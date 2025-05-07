@@ -4,27 +4,44 @@ extends layout
 block content
   .container.mt-5
     h2 Welcome, #{user.name}!
-    p You are now logged in  #{user.role}.
-    a.btn.btn-primary(href="/reserve") Reserve a Table
-    a.btn.btn-secondary(href="/logout") Logout
+    p You are now logged in as #{user.role || 'user'}.
+    
+    if success
+      .alert.alert-success(role="alert")= success
+    
+    if error
+      .alert.alert-danger(role="alert")= error
+    
+    .d-flex.gap-2.mb-4
+      a.btn.btn-primary(href="/reserve") Reserve a Table
+      a.btn.btn-secondary(href="/logout") Logout
 
     h3.mt-5 Your Reservations
     if reservations && reservations.length > 0
-      table.table.table-striped
-        thead
-          tr
-            th Customer Name
-            th Date
-            th Time
-            th Guests
-            th Phone Number
-        tbody
-          each reservation in reservations
+      .table-responsive
+        table.table.table-striped.table-hover
+          thead.table-dark
             tr
-              td= reservation.customer_name
-              td= reservation.reservation_date
-              td= reservation.reservation_time
-              td= reservation.number_of_guests
-              td= reservation.phone_number
+              th Customer Name
+              th Date
+              th Time
+              th Guests
+              th Phone Number
+              th Special Requests
+              th Actions
+          tbody
+            each reservation in reservations
+              tr
+                td= reservation.customer_name
+                td= new Date(reservation.reservation_date).toLocaleDateString()
+                td= reservation.reservation_time
+                td= reservation.number_of_guests
+                td= reservation.phone_number
+                td= reservation.special_requests || 'None'
+                td
+                  form(action=`/cancel-reservation/${reservation.id}`, method="POST", style="display:inline")
+                    button.btn.btn-danger.btn-sm(type="submit" onclick="return confirm('Are you sure you want to cancel this reservation?')") Cancel
     else
-      p You have no reservations yet.
+      .alert.alert-info(role="alert")
+        p.mb-0 You have no reservations yet. 
+        a.alert-link(href="/reserve") Click here to make your first reservation!

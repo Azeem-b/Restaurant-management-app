@@ -5,7 +5,7 @@ const session = require("express-session");
 const MySQLStore = require("express-mysql-session")(session);
 const fs = require('fs');
 const morgan = require('morgan');
-const mysql = require('mysql2/promise');
+const pool = require('./config/database');
 
 // Import controllers
 const authController = require("./controllers/authController");
@@ -17,27 +17,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Database Configuration
-const dbConfig = {
+// Session store configuration
+const sessionStore = new MySQLStore({
   host: process.env.MYSQL_HOST,
   user: process.env.MYSQL_USER,
   password: process.env.MYSQL_PASSWORD,
   database: process.env.MYSQL_DATABASE,
   port: parseInt(process.env.DB_PORT),
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-};
-
-// Create database pool
-const pool = mysql.createPool(dbConfig);
-
-// Make pool available globally
-global.pool = pool;
-
-// Session store configuration
-const sessionStore = new MySQLStore({
-  ...dbConfig,
   createDatabaseTable: true,
   schema: {
     tableName: 'sessions',
@@ -55,20 +41,18 @@ const sessionStore = new MySQLStore({
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 
-// Static file serving - UPDATED TO SIMPLIFIED VERSION
+// Static file serving
 const staticDir = path.join(__dirname, 'public');
 console.log(`[Static Files] Serving from: ${staticDir}`);
 
+// Ensure public directory exists
+if (!fs.existsSync(staticDir)) {
+  fs.mkdirSync(staticDir, { recursive: true });
+  console.log(`Created static directory: ${staticDir}`);
+}
+
 // Primary static file middleware
 app.use(express.static(staticDir));
-
-// Additional debugging middleware
-app.use((req, res, next) => {
-  if (req.path.match(/\.(css|js|jpg|png)$/)) {
-    console.log(`[Static Request] ${req.method} ${req.path}`);
-  }
-  next();
-});
 
 // Request logging
 app.use(morgan(isProduction ? 'combined' : 'dev'));
@@ -105,31 +89,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// =============================================
-// TEST ROUTES
-// =============================================
-app.get('/test-css', (req, res) => {
-  const cssPath = path.join(__dirname, 'public/css/styles.css');
-  if (!fs.existsSync(cssPath)) {
-    return res.status(404).send('CSS file not found');
-  }
-  res.type('text/css').sendFile(cssPath);
-});
-
-app.get('/static-test', (req, res) => {
-  res.json({
-    staticDir: staticDir,
-    files: {
-      css: {
-        exists: fs.existsSync(path.join(staticDir, 'css/styles.css')),
-        path: path.join(staticDir, 'css/styles.css')
-      },
-      logo: {
-        exists: fs.existsSync(path.join(staticDir, 'images/logo.png')),
-        path: path.join(staticDir, 'images/logo.png')
-      }
-    }
-  });
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
 });
 
 // =============================================
@@ -144,8 +106,6 @@ app.post("/login", authController.login);
 app.get("/register", authController.showRegisterForm);
 app.post("/register", authController.register);
 app.get("/logout", authController.logout);
-app.get("/forgot-password", authController.showForgotPasswordForm);
-app.post("/forgot-password", authController.handleForgotPassword);
 
 // Menu Route
 app.get("/menu", menuController.showMenu);
@@ -154,15 +114,27 @@ app.get("/menu", menuController.showMenu);
 app.get("/reserve", authController.ensureLoggedIn, reservationController.showForm);
 app.post("/reserve", authController.ensureLoggedIn, reservationController.create);
 
+// Forgot Password Routes
+app.get("/forgot-password", authController.showForgotPasswordForm);
+app.post("/forgot-password", authController.handleForgotPassword);
+
 // Database Test Route
 app.get("/test-db", async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT 1 + 1 AS solution');
-    res.json({ result: rows[0].solution });
+    res.json({ success: true, result: rows[0].solution });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Database test error:', err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
+
+app.get('/test-pug', (req, res) => {
+  res.render('forgot-password', { message: 'Test message' });
+});
+
+// Cancel Reservation Route
+app.post('/cancel-reservation/:id', authController.ensureLoggedIn, reservationController.cancel);
 
 // =============================================
 // ERROR HANDLING
@@ -188,12 +160,14 @@ app.use((err, req, res, next) => {
 // =============================================
 // SERVER STARTUP
 // =============================================
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`
   ========================================
   SERVER RUNNING: http://localhost:${PORT}
   Environment: ${process.env.NODE_ENV || 'development'}
   Static files: ${staticDir}
+  Database host: ${process.env.MYSQL_HOST}
+  Database port: ${process.env.DB_PORT}
   ========================================
   `);
 });

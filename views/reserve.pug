@@ -4,17 +4,25 @@ extends layout
 block content
   .container.mt-5
     h2 Reserve a Table
-    form(action="/reserve", method="POST")
+    if error
+      .alert.alert-danger(role="alert")= error
+    form.reserve-form(action="/reserve", method="POST")
+      .mb-3
+        label.form-label(for="customer_name") Customer Name
+        input.form-control(type="text", id="customer_name", name="customer_name", required, value=formData ? formData.customer_name : '')
       .mb-3
         label.form-label(for="reservation_date") Reservation Date
-        input.form-control(type="date", id="reservation_date", name="reservation_date", required)
+        input.form-control(type="date", id="reservation_date", name="reservation_date", required, value=formData ? formData.reservation_date : '')
       .mb-3
         label.form-label(for="reservation_time") Reservation Time
-        input.form-control(type="time", id="reservation_time", name="reservation_time", required)
+        input.form-control(type="time", id="reservation_time", name="reservation_time", required, value=formData ? formData.reservation_time : '')
       .mb-3
         label.form-label(for="number_of_guests") Number of Guests
-        input.form-control(type="number", id="number_of_guests", name="number_of_guests", min="1", required)
+        input.form-control(type="number", id="number_of_guests", name="number_of_guests", min="1", required, value=formData ? formData.number_of_guests : '')
       .mb-3
         label.form-label(for="phone_number") Phone Number
-        input.form-control(type="tel", id="phone_number", name="phone_number", placeholder="Enter your phone number", required)
+        input.form-control(type="tel", id="phone_number", name="phone_number", placeholder="Enter your phone number", required, value=formData ? formData.phone_number : '')
+      .mb-3
+        label.form-label(for="special_requests") Special Requests (Optional)
+        textarea.form-control(id="special_requests", name="special_requests", rows="3", placeholder="Any special requests or dietary requirements?")= formData ? formData.special_requests : ''
       button.btn.btn-primary(type="submit") Reserve Table

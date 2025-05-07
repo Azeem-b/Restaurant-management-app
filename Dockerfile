@@ -1,38 +1,30 @@
-FROM node:16
+FROM node:18
 
-# Install dependencies
+# Install MySQL client and netcat
 RUN apt-get update && \
-    apt-get install -y default-mysql-client netcat-openbsd curl && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y default-mysql-client netcat-openbsd
 
+# Set working directory
 WORKDIR /usr/src/app
 
-# Install dependencies with clean cache
+# Copy package files
 COPY package*.json ./
-RUN npm install -g supervisor && \
-    npm install && \
-    npm cache clean --force
 
-# Copy application files
+# Install dependencies
+RUN npm install
+
+# Copy app source
 COPY . .
 
-# Verify critical paths
-RUN echo "=== Verifying File Structure ===" && \
-    ls -la && \
-    [ -d static ] && ls -la static/ && \
-    [ -d static/images ] && ls -la static/images/ && \
-    [ -d views ] && ls -la views/ && \
-    echo "=== Checking DB Config ===" && \
-    node -e "try { console.log('DB config exists'); } catch(e) { console.error('DB config error:', e); process.exit(1); }" && \
-    echo "==========================="
+# Create directory for uploaded images
+RUN mkdir -p public/images
 
+# Expose port
 EXPOSE 3000
 
-# Healthcheck would be overridden by compose healthcheck
+# Healthcheck
 HEALTHCHECK --interval=30s --timeout=3s \
   CMD curl -f http://localhost:3000/health || exit 1
 
-CMD ["sh", "-c", "echo '=== Final Verification ==='; \
-     ls -la /usr/src/app/static; \
-     echo '=== Starting Application ==='; \
-     node app.js"]
+# Start command
+CMD ["sh", "-c", "node app.js"]
